@@ -1,3 +1,5 @@
-const {main}=require('./cli');
+const {sslConnect,sslServer} = require('./streams');
+const {ProtocolVersion} = require('./protocol');
+const Agent = require('./agent');
 
-if (require.main == module) main(process.argv.slice(2));
+module.exports = {sslConnect, sslServer, ProtocolVersion, Agent};

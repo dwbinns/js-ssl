@@ -20,9 +20,9 @@ class ProtocolVersion {
     static parse(text) {
         switch(text) {
             case 'ssl3': return ProtocolVersion.SSL3;
-            case 'tls1.0': return ProtocolVersion.TLS10;
-            case 'tls1.1': return ProtocolVersion.TLS11;
-            case 'tls1.2': return ProtocolVersion.TLS12;
+            case 'tls1.0': return ProtocolVersion.TLS1_0;
+            case 'tls1.1': return ProtocolVersion.TLS1_1;
+            case 'tls1.2': return ProtocolVersion.TLS1_2;
         }
         throw new Error("Unknown version: "+text);
     }
@@ -36,9 +36,9 @@ ProtocolVersion.encoding = [
 ];
 
 ProtocolVersion.SSL3=new ProtocolVersion(3,0);
-ProtocolVersion.TLS10=new ProtocolVersion(3,1);
-ProtocolVersion.TLS11=new ProtocolVersion(3,2);
-ProtocolVersion.TLS12=new ProtocolVersion(3,3);
+ProtocolVersion.TLS1_0=new ProtocolVersion(3,1);
+ProtocolVersion.TLS1_1=new ProtocolVersion(3,2);
+ProtocolVersion.TLS1_2=new ProtocolVersion(3,3);
 
 class SessionID {
 }
@@ -182,7 +182,7 @@ class ClientKeyExchange {
         return crypto.privateDecrypt({key: privateKey, padding:crypto.constants.RSA_PKCS1_PADDING}, this.exchangeKeys);
     }
 }
-ClientKeyExchange.encoding=(clientKeyExchange, context) => context.version.atLeast(ProtocolVersion.TLS10) ? [
+ClientKeyExchange.encoding=(clientKeyExchange, context) => context.version.atLeast(ProtocolVersion.TLS1_0) ? [
     {exchangeKeys:size(u16BE,bytes())},
 ] : [
     {exchangeKeys:bytes()},
@@ -202,7 +202,7 @@ class Finished {
     constructor(version, masterSecret, allMessages, isClient) {
 
         if (version) {
-            if (version.atLeast(ProtocolVersion.TLS10)) {
+            if (version.atLeast(ProtocolVersion.TLS1_0)) {
                 this.verifyData=prf(12,masterSecret,isClient ? "client finished" : "server finished", Buffer.concat([md5(...allMessages), sha(...allMessages)]));
             } else {
                 const senders=[Buffer.from('434C4E54','hex'), Buffer.from('53525652','hex')];
@@ -223,7 +223,7 @@ class Finished {
         return Buffer.compare(this.verifyData, expectedFinished.verifyData)==0;
     }
 }
-Finished.encoding=(finished, context) => context.version.atLeast(ProtocolVersion.TLS10) ? [
+Finished.encoding=(finished, context) => context.version.atLeast(ProtocolVersion.TLS1_0) ? [
     {verifyData:bytes(12)},
 ] : [
     {verifyData:bytes(36)},
@@ -297,7 +297,7 @@ SSLMACSource.encoding = [
         22:Handshake,
         23:ApplicationData,
     })},
-    (_, context) => context.version.atLeast(ProtocolVersion.TLS10) ? {version:auto} : null,
+    (_, context) => context.version.atLeast(ProtocolVersion.TLS1_0) ? {version:auto} : null,
     {data:size(u16BE,bytes())}
 ];
 

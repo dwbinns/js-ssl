@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 'use strict';
 
 let usage=`Javascript SSL
@@ -98,5 +99,7 @@ function help() {
 function main(args) {
     (({server, client, proxy, httpProxy, httpsClient})[args[0]] || help)(...args.slice(1));
 }
+
+if (require.main == module) main(process.argv.slice(2));
 
 module.exports={main};

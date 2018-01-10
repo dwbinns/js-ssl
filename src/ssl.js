@@ -148,7 +148,7 @@ class Decrypt {
             let paddingLength=decrypted[data.length-1];
             let mac=decrypted.slice(decrypted.byteLength-paddingLength-1-this.cryptoSettings.cipherSuite.mac.hashSize,decrypted.byteLength-paddingLength-1);
             let fragment = decrypted.slice(0,decrypted.byteLength-paddingLength-1-this.cryptoSettings.cipherSuite.mac.hashSize);
-            let isTLS = this.sslProcessor.version.atLeast(ProtocolVersion.TLS10);
+            let isTLS = this.sslProcessor.version.atLeast(ProtocolVersion.TLS1_0);
             let expectedMac=this.cryptoSettings.cipherSuite.mac.computeMAC(isTLS,this.cryptoSettings.macSecret, write(new SSLMACSource(this.sequenceNumber++, type, this.sslProcessor.version, fragment), this.sslProcessor));
             /*console.log('mac found: ',toHex(mac));
             console.log('mac expect:',toHex(expectedMac));*/
@@ -170,7 +170,7 @@ class Encrypt {
     }
     encrypt(type, fragment) {
         if (this.cryptoSettings && this.cryptoSettings.cipherSuite.cipher.blockMode) {
-            let isTLS = this.sslProcessor.version.atLeast(ProtocolVersion.TLS10);
+            let isTLS = this.sslProcessor.version.atLeast(ProtocolVersion.TLS1_0);
             let mac=this.cryptoSettings.cipherSuite.mac.computeMAC(isTLS, this.cryptoSettings.macSecret, write(new SSLMACSource(this.sequenceNumber++, type, this.sslProcessor.version, fragment),this.sslProcessor));
             let blockSize=this.cryptoSettings.cipherSuite.cipher.blockSize;
             let paddingLength=blockSize-(mac.byteLength+fragment.byteLength)% blockSize-1;
@@ -187,7 +187,7 @@ class Encrypt {
 class SSLProcessor {
     constructor(isClient, version, certificates = [], key) {
         //this.latestVersion=ProtocolVersion.SSL3;
-        //this.latestVersion=ProtocolVersion.TLS10;
+        //this.latestVersion=ProtocolVersion.TLS1_0;
         this.latestVersion=version;
         this.version=ProtocolVersion.SSL3;
 
@@ -331,7 +331,7 @@ class SSLProcessor {
 
         let masterSecret,keyBlockData;
 
-        if (this.version.atLeast(ProtocolVersion.TLS10)) {
+        if (this.version.atLeast(ProtocolVersion.TLS1_0)) {
             masterSecret=prf(48,preMasterSecret,"master secret",Buffer.concat([clientRandom, serverRandom]));
             keyBlockData=prf(104,masterSecret,"key expansion",Buffer.concat([serverRandom, clientRandom]));
             console.log('masterSecret:',toHex(masterSecret));
