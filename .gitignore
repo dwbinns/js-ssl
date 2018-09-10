@@ -1,1 +1,4 @@
 /node_modules
+/test-openssl/openssl-1.0.2k
+/test-openssl/openssl-1.0.2k.tar.gz
+/test-openssl/*.pem
